@@ -67,8 +67,13 @@ def convert_examples_to_features(
 
     labels = [label_from_example(example) for example in examples]
 
+    text = [example.text_a for example in examples]
+    text_pair = None
+    if examples[0].text_b is not None:
+        text_pair = [example.text_b for example in examples]
     batch_encoding = tokenizer(
-        [(example.text_a, example.text_b) for example in examples],
+        text=text,
+        text_pair=text_pair,
         max_length=max_length,
         padding="max_length",
         truncation=True,
