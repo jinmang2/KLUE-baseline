@@ -1,4 +1,5 @@
 # KLUE Baseline
+- pl version 1.6.0
 
 [Korean(한국어)](README_ko.md)
 
