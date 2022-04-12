@@ -12,10 +12,15 @@ from pytorch_lightning.loggers import CSVLogger
 from klue_baseline import KLUE_TASKS
 from klue_baseline.utils import Command, LoggingCallback
 
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 logging.basicConfig(
+    filename="./klue-baseline.log",
+    filemode="a",
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
     datefmt="%m/%d/%Y %H:%M:%S",
-    level=logging.INFO,
+    level=logging.DEBUG,
 )
 logger = logging.getLogger(__name__)
 
@@ -179,8 +184,8 @@ def main() -> None:
         trainer.fit(**task.to_dict())
 
         # load the best checkpoint automatically
-        trainer.get_model().eval_dataset_type = "valid"
-        val_results = trainer.test(test_dataloaders=task.val_loader, verbose=False)[0]
+        trainer.model.eval_dataset_type = "valid"
+        val_results = trainer.test(dataloaders=task.val_loader, verbose=False)[0]
         print("-" * 80)
 
         output_val_results_file = os.path.join(args.output_dir, "val_results.txt")
