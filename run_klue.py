@@ -2,12 +2,13 @@ import argparse
 import logging
 import os
 import sys
+import inspect
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 
 import lightning as L
-from lightning.callbacks import EarlyStopping, ModelCheckpoint
-from lightning.loggers import CSVLogger
+from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
+from lightning.pytorch.loggers import CSVLogger
 
 from klue_baseline import KLUE_TASKS
 from klue_baseline.utils import Command, LoggingCallback
@@ -114,6 +115,7 @@ def make_klue_trainer(
         )
     early_stopping_callback = EarlyStopping(monitor=metric_key, patience=args.patience, mode=args.early_stopping_mode)
     extra_callbacks.append(early_stopping_callback)
+    callbacks = [logging_callback] + extra_callbacks + [checkpoint_callback]
 
     train_params: Dict[str, Any] = {}
     if args.fp16:
@@ -128,13 +130,21 @@ def make_klue_trainer(
     train_params["accumulate_grad_batches"] = args.accumulate_grad_batches
     train_params["profiler"] = extra_train_kwargs.get("profiler", None)
 
-    return L.Trainer.from_argparse_args(
-        args,
-        weights_summary=None,
-        callbacks=[logging_callback] + extra_callbacks,
-        logger=csv_logger,
-        checkpoint_callback=checkpoint_callback,
-        **train_params,
+    def from_argparse_args(cls, args, **kwargs):
+        if isinstance(args, argparse.ArgumentParser):
+            args = cls.parse_argparser(args)
+
+        params = vars(args)
+
+        # we only want to pass in valid Trainer args, the rest may be user specific
+        valid_kwargs = inspect.signature(cls.__init__).parameters
+        trainer_kwargs = {name: params[name] for name in valid_kwargs if name in params}
+        trainer_kwargs.update(**kwargs)
+
+        return cls(**trainer_kwargs)
+
+    return from_argparse_args(
+        L.Trainer, args, callbacks=callbacks, logger=csv_logger, **train_params,
     )
 
 
