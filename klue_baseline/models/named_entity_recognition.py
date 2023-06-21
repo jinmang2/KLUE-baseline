@@ -3,7 +3,6 @@ import logging
 from typing import Any, Dict, List, Union
 
 import torch
-from overrides import overrides
 from transformers import AutoModelForTokenClassification
 
 from klue_baseline.data import check_tokenizer_type
@@ -36,11 +35,9 @@ class NERTransformer(BaseTransformer):
             metrics=metrics,
         )
 
-    @overrides
     def forward(self, **inputs: torch.Tensor) -> Any:
         return self.model(**inputs)
 
-    @overrides
     def training_step(self, batch: List[torch.Tensor], batch_idx: int) -> dict:
         inputs = {"input_ids": batch[0], "attention_mask": batch[1], "labels": batch[3]}
 
@@ -52,7 +49,6 @@ class NERTransformer(BaseTransformer):
         self.log("train/loss", loss)
         return {"loss": loss}
 
-    @overrides
     def validation_step(self, batch: List[torch.Tensor], batch_idx: int, data_type: str = "valid") -> dict:
         inputs = {"input_ids": batch[0], "attention_mask": batch[1], "labels": batch[3]}
 
@@ -66,7 +62,6 @@ class NERTransformer(BaseTransformer):
 
         return {"logits": logits, "labels": inputs["labels"]}
 
-    @overrides
     def validation_epoch_end(
         self, outputs: List[Dict[str, torch.Tensor]], data_type: str = "valid", write_predictions: bool = False
     ) -> None:
@@ -204,7 +199,6 @@ class NERTransformer(BaseTransformer):
                 j -= 1
         return t_out_new
 
-    @overrides
     def _convert_outputs_to_preds(self, outputs: List[Dict[str, torch.Tensor]]) -> torch.Tensor:
         logits = torch.cat([output["logits"] for output in outputs], dim=0)
         return torch.argmax(logits, axis=2)
