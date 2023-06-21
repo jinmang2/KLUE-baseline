@@ -58,7 +58,7 @@ class WoSDataset(Dataset):
 class WoSDataModule(L.LightningDataModule):
     def __init__(self, args: argparse.Namespace, processor: DataProcessor) -> None:
         super().__init__()
-        self.hparams = args
+        self._set_hparams(args)
         self.processor = processor
 
     def prepare_dataset(self, dataset_type: str) -> Any:
