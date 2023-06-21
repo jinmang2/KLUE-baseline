@@ -58,6 +58,7 @@ class BaseTransformer(L.LightningModule):
         **config_kwargs: Dict[str, Any],
     ) -> None:
         super().__init__()
+        self.validation_step_outputs = []
 
         data = getattr(hparams, "data", None)
         if data is not None:
@@ -153,9 +154,10 @@ class BaseTransformer(L.LightningModule):
         # return Format: (e.g. dictionary {"logits": logits, "labels": labels})
         raise NotImplementedError
 
-    def validation_epoch_end(
-        self, outputs: List[Dict[str, torch.Tensor]], data_type: str = "valid", write_predictions: bool = False
+    def on_validation_epoch_end(
+        self, data_type: str = "valid", write_predictions: bool = False
     ) -> None:
+        outputs = self.validation_step_outputs
         preds = self._convert_outputs_to_preds(outputs)
         labels = torch.cat([output["labels"] for output in outputs], dim=0)
 
@@ -166,6 +168,8 @@ class BaseTransformer(L.LightningModule):
         for k, metric in self.metrics.items():
             metric(preds, labels)
             self.log(f"{data_type}/{k}", metric, on_step=False, on_epoch=True, logger=True)
+
+        self.validation_step_outputs.clear()
 
     def test_step(self, batch: List[torch.Tensor], batch_idx: int) -> Dict[str, torch.Tensor]:
         assert self.eval_dataset_type in {"valid", "test"}

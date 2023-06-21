@@ -41,6 +41,7 @@ class DSTTransformer(BaseTransformer):
             model_type=AutoModel,
             metrics=metrics,
         )
+        self.validation_step_outputs = []
         self.processor = hparams.processor
         hparams.processor = None
 
@@ -145,11 +146,14 @@ class DSTTransformer(BaseTransformer):
         dst_result = DSTResult(prs=prs, gts=labels, guids=guids)
         # val_output_dict = {"prs": prs, "gts": gts}
         # return val_output_dict
-        return {"results": dst_result}
+        dst_result = {"results": dst_result}
+        self.validation_step_outputs.append(dst_result)
+        return dst_result
 
-    def validation_epoch_end(
-        self, outputs: List[Dict[str, List[str]]], data_type: str = "valid", write_predictions: bool = False
+    def on_validation_epoch_end(
+        self, data_type: str = "valid", write_predictions: bool = False
     ) -> None:
+        outputs = self.validation_step_outputs
         # prs = [output["prs"] for output in outputs]  # B * steps
         # gts = [output["gts"] for output in outputs]
         prs = []
@@ -173,6 +177,8 @@ class DSTTransformer(BaseTransformer):
         for k, metric in self.metrics.items():
             metric(prs, gts)
             self.log(f"{data_type}/{k}", metric, on_step=False, on_epoch=True, logger=True)
+        
+        self.validation_step_outputs.clear()
 
     def write_prediction_file(
         self, prs: Sequence[Sequence[str]], gts: Sequence[Sequence[str]], guids: Sequence[str]
