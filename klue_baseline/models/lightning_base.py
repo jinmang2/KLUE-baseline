@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pkg_resources
 import lightning as L
+import lightning.pytorch as pl
 import torch
 import torch.nn as nn
 from transformers import AdamW, AutoConfig, AutoTokenizer, PretrainedConfig, PreTrainedTokenizer
@@ -200,7 +201,7 @@ class BaseTransformer(L.LightningModule):
         effective_batch_size = self.hparams.train_batch_size * self.hparams.accumulate_grad_batches * num_devices
         return (self.hparams.dataset_size / effective_batch_size) * self.hparams.max_epochs
 
-    @L.utilities.rank_zero_only
+    @pl.utilities.rank_zero_only
     def on_save_checkpoint(self, checkpoint: Dict[str, Any]) -> None:
         save_path = self.output_dir.joinpath("transformers")
         self.model.config.save_step = self.step_count

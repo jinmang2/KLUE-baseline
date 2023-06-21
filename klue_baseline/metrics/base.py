@@ -1,9 +1,8 @@
 from typing import Any, Callable, Optional
 
 import torch
-# from pytorch_lightning.metrics import Metric
 from torchmetrics import Metric
-from lightning.utilities import rank_zero_warn
+from lightning.pytorch.utilities import rank_zero_warn
 
 
 class BaseMetric(Metric):
