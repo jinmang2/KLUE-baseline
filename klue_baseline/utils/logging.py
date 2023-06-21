@@ -5,7 +5,7 @@ import logging
 import os
 
 import lightning as L
-from lightning.utilities import rank_zero_info
+from lightning.pytorch.utilities import rank_zero_info
 from torch.utils.data import DataLoader
 
 logger = logging.getLogger(__name__)
