@@ -43,7 +43,8 @@ class BaseMetric(Metric):
             preds: Predictions from model
             targets: Ground truth values
         """
-
+        print(preds)
+        print(targets)
         self.preds.append(preds)
         self.targets.append(targets)
 
@@ -63,6 +64,42 @@ class BaseMetric(Metric):
         score = self.metric_fn(preds, targets)
         score = torch.tensor(score).to(self.device)
         return score
+
+    def __hash__(self):
+        hash_vals = [self.__class__.__name__, id(self)]
+
+        for key in self._defaults:
+            val = getattr(self, key)
+            # Special case: allow list values, so long
+            # as their elements are hashable
+            if hasattr(val, "__iter__") and not isinstance(val, torch.Tensor):
+                # nested list
+                if isinstance(val[0], list) and isinstance(val[0][0], list):
+
+                    def get_size_of_nested_list(nested_list):
+                        count = [len(nested_list)]
+                        for elt in nested_list:
+                            if isinstance(elt, list):
+                                count += get_size_of_nested_list(elt)
+                        return count
+
+                    def resolve_nested_list(nested_list):
+                        resolved = []
+                        for elt in nested_list:
+                            if not isinstance(elt, list):
+                                resolved.append(elt)
+                            else:
+                                resolved.extend(resolve_nested_list(elt))
+                        return resolved
+
+                    hash_vals.append(get_size_of_nested_list(val))
+                    hash_vals.append(resolve_nested_list(val))
+                else:
+                    hash_vals.extend(val)
+            else:
+                hash_vals.append(val)
+
+        return hash(tuple(hash_vals))
 
 
 class LabelRequiredMetric(BaseMetric):
