@@ -1,7 +1,7 @@
 # Framework
 torch
 transformers
-pytorch-lightning
+lightning
 
 # Utils
 dataclasses

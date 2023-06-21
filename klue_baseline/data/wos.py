@@ -7,7 +7,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
-import pytorch_lightning as pl
+import lightning as L
 import torch
 from torch.utils.data import DataLoader, Dataset
 from transformers import PreTrainedTokenizer
@@ -55,7 +55,7 @@ class WoSDataset(Dataset):
         return self.features[idx]
 
 
-class WoSDataModule(pl.LightningDataModule):
+class WoSDataModule(L.LightningDataModule):
     def __init__(self, args: argparse.Namespace, processor: DataProcessor) -> None:
         super().__init__()
         self.hparams = args

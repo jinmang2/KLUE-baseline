@@ -4,18 +4,18 @@ import csv
 import logging
 import os
 
-import pytorch_lightning as pl
-from pytorch_lightning.utilities import rank_zero_info
+import lightning as L
+from lightning.utilities import rank_zero_info
 from torch.utils.data import DataLoader
 
 logger = logging.getLogger(__name__)
 
 
-class LoggingCallback(pl.Callback):
+class LoggingCallback(L.Callback):
 
     SKIP_KEYS = set(["log", "progress_bar"])
 
-    def on_batch_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
+    def on_batch_end(self, trainer: L.Trainer, pl_module: L.LightningModule) -> None:
         # Train batch loss
         global_step = pl_module.global_step
         verbose_step_count = pl_module.hparams.verbose_step_count
@@ -29,7 +29,7 @@ class LoggingCallback(pl.Callback):
         lrs = {f"lr_group_{i}": lr for i, lr in enumerate(lr_scheduler.get_last_lr())}
         pl_module.logger.log_metrics(lrs)
 
-    def on_validation_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
+    def on_validation_end(self, trainer: L.Trainer, pl_module: L.LightningModule) -> None:
         global_step = pl_module.global_step
         if global_step == 0:
             return
@@ -42,7 +42,7 @@ class LoggingCallback(pl.Callback):
                 continue
             rank_zero_info(f"{k} = {v}")
 
-    def on_test_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
+    def on_test_end(self, trainer: L.Trainer, pl_module: L.LightningModule) -> None:
         rank_zero_info("***** Test results *****")
 
         # Write Predictions
@@ -61,7 +61,7 @@ class LoggingCallback(pl.Callback):
                 rank_zero_info(f"{k} = {v}")
                 writer.write(f"{k} = {v}\n")
 
-    def _write_predictions(self, dataloaders: DataLoader, pl_module: pl.LightningModule) -> None:
+    def _write_predictions(self, dataloaders: DataLoader, pl_module: L.LightningModule) -> None:
         index = 0
         output_test_pred_file = os.path.join(pl_module.hparams.output_dir, "test_predictions.tsv")
         with open(output_test_pred_file, "w", newline="\n") as csvfile:

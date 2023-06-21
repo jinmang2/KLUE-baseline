@@ -5,7 +5,7 @@ import os
 import random
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
-import pytorch_lightning as pl
+import lightning as L
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -188,7 +188,7 @@ class DSTTransformer(BaseTransformer):
         with open(os.path.join(save_path, f"pred-{self.step_count}.json"), "w", encoding="utf-8") as f:
             f.write(json.dumps(pred_dict, indent=4, ensure_ascii=False))
 
-    @pl.utilities.rank_zero_only
+    @L.utilities.rank_zero_only
     def on_save_checkpoint(self, checkpoint: Dict[str, Any]) -> None:
         save_path = self.output_dir.joinpath("transformers")
         if not os.path.exists(save_path):

@@ -5,9 +5,9 @@ import sys
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 
-import pytorch_lightning as pl
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
-from pytorch_lightning.loggers import CSVLogger
+import lightning as L
+from lightning.callbacks import EarlyStopping, ModelCheckpoint
+from lightning.loggers import CSVLogger
 
 from klue_baseline import KLUE_TASKS
 from klue_baseline.utils import Command, LoggingCallback
@@ -87,11 +87,11 @@ def add_general_args(parser: argparse.ArgumentParser, root_dir: str) -> argparse
 def make_klue_trainer(
     args: argparse.Namespace,
     extra_callbacks: List = [],
-    checkpoint_callback: Optional[pl.Callback] = None,
-    logging_callback: Optional[pl.Callback] = None,
+    checkpoint_callback: Optional[L.Callback] = None,
+    logging_callback: Optional[L.Callback] = None,
     **extra_train_kwargs,
-) -> pl.Trainer:
-    pl.seed_everything(args.seed)
+) -> L.Trainer:
+    L.seed_everything(args.seed)
 
     # Logging
     csv_logger = CSVLogger(args.output_dir, name=args.task)
@@ -128,7 +128,7 @@ def make_klue_trainer(
     train_params["accumulate_grad_batches"] = args.accumulate_grad_batches
     train_params["profiler"] = extra_train_kwargs.get("profiler", None)
 
-    return pl.Trainer.from_argparse_args(
+    return L.Trainer.from_argparse_args(
         args,
         weights_summary=None,
         callbacks=[logging_callback] + extra_callbacks,

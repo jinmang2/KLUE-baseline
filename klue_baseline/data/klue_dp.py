@@ -3,7 +3,7 @@ import logging
 import os
 from typing import Any, List, Optional, Tuple
 
-import pytorch_lightning as pl
+import lightning as L
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 from transformers import PreTrainedTokenizer
@@ -74,7 +74,7 @@ class KlueDPInputFeatures:
         self.pos_ids = pos_ids
 
 
-class KlueDPDataModule(pl.LightningDataModule):
+class KlueDPDataModule(L.LightningDataModule):
     def __init__(self, args: argparse.Namespace, processor: DataProcessor) -> None:
         super().__init__()
         self.hparams = args

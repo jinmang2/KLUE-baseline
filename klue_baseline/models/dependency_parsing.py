@@ -4,7 +4,7 @@ import os
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-import pytorch_lightning as pl
+import lightning as L
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -271,7 +271,7 @@ class DPTransformer(BaseTransformer):
             type_labels.tolist(),
         )
 
-    @pl.utilities.rank_zero_only
+    @L.utilities.rank_zero_only
     def on_save_checkpoint(self, checkpoint: Dict[str, Any]) -> None:
         save_path = self.output_dir.joinpath("transformers")
         if not os.path.exists(save_path):

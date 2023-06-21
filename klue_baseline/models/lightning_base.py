@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import pkg_resources
-import pytorch_lightning as pl
+import lightning as L
 import torch
 import torch.nn as nn
 from transformers import AdamW, AutoConfig, AutoTokenizer, PretrainedConfig, PreTrainedTokenizer
@@ -40,7 +40,7 @@ arg_to_scheduler_choices = sorted(arg_to_scheduler.keys())
 arg_to_scheduler_metavar = "{" + ", ".join(arg_to_scheduler_choices) + "}"
 
 
-class BaseTransformer(pl.LightningModule):
+class BaseTransformer(L.LightningModule):
     """Initializes a model, tokenizer and config for the task."""
 
     USE_TOKEN_TYPE_MODELS = ["bert", "xlnet", "electra"]
@@ -200,7 +200,7 @@ class BaseTransformer(pl.LightningModule):
         effective_batch_size = self.hparams.train_batch_size * self.hparams.accumulate_grad_batches * num_devices
         return (self.hparams.dataset_size / effective_batch_size) * self.hparams.max_epochs
 
-    @pl.utilities.rank_zero_only
+    @L.utilities.rank_zero_only
     def on_save_checkpoint(self, checkpoint: Dict[str, Any]) -> None:
         save_path = self.output_dir.joinpath("transformers")
         self.model.config.save_step = self.step_count

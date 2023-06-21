@@ -7,7 +7,7 @@ import logging
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
 
-import pytorch_lightning as pl
+import lightning as L
 from torch.utils.data import DataLoader, Dataset
 from transformers import PreTrainedTokenizer
 
@@ -98,7 +98,7 @@ class DataProcessor:
         raise NotImplementedError()
 
 
-class KlueDataModule(pl.LightningDataModule):
+class KlueDataModule(L.LightningDataModule):
     """Constructs a basic datamodule for dataset and dataloader."""
 
     def __init__(self, args: argparse.Namespace, processor: DataProcessor) -> None:
