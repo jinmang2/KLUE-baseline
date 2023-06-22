@@ -74,7 +74,7 @@ class BaseMetric(Metric):
             # as their elements are hashable
             if hasattr(val, "__iter__") and not isinstance(val, torch.Tensor):
                 # nested list
-                if isinstance(val[0], list) and isinstance(val[0][0], list):
+                if val and isinstance(val[0], list) and isinstance(val[0][0], list):
 
                     def get_size_of_nested_list(nested_list):
                         count = [len(nested_list)]
