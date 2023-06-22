@@ -43,8 +43,6 @@ class BaseMetric(Metric):
             preds: Predictions from model
             targets: Ground truth values
         """
-        print(preds)
-        print(targets)
         self.preds.append(preds)
         self.targets.append(targets)
 
@@ -92,8 +90,8 @@ class BaseMetric(Metric):
                                 resolved.extend(resolve_nested_list(elt))
                         return resolved
 
-                    hash_vals.append(get_size_of_nested_list(val))
-                    hash_vals.append(resolve_nested_list(val))
+                    hash_vals.append(tuple(get_size_of_nested_list(val)))
+                    hash_vals.append(tuple(resolve_nested_list(val)))
                 else:
                     hash_vals.extend(val)
             else:
